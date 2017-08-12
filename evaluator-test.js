@@ -1,18 +1,6 @@
 'use strict';
-!function() {
 
-  var testCount =0;
-  var assertEquals = function(expected, actual) {
-    testCount += 1;
-    if (expected !== actual) {
-      throw 'expected ' + JSON.stringify(expected) +
-        ' but ' + JSON.stringify(actual);
-    }
-  };
-
-  var t1 = +new Date();
-
-for (var i = 0; i < 1000; i += 1) {
+var doTest = function(assertEquals) {
 
   assertEquals(false, evaluator.evalString('!1') );
   assertEquals(false, evaluator.evalString('!!0') );
@@ -88,8 +76,26 @@ for (var i = 0; i < 1000; i += 1) {
   assertEquals(13, vars.d.e);
   assertEquals('puke', evaluator.evalString('d.b = "puke"', context) );
   assertEquals(8, evaluator.evalString('d.c(3 * 2, 2)', context) );
-}
+};
+
+!function() {
+
+  var testCount = 0;
+  var assertEquals = function(expected, actual) {
+    testCount += 1;
+    if (expected !== actual) {
+      throw 'expected ' + JSON.stringify(expected) +
+        ' but ' + JSON.stringify(actual);
+    }
+  };
+
+  var t1 = +new Date();
+
+  for (var i = 0; i < 1000; i += 1) {
+    doTest(assertEquals);
+  }
 
   var t2 = +new Date();
+
   console.log(testCount + ' tests in ' + (t2 - t1) + ' ms');
 }();
