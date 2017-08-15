@@ -111,20 +111,18 @@ var evaluator = function() {
     };
 
     [ '+', '-', '*', '/', '%', '<<', '>>', '>>>', '&', '^', '|' ].
-    forEach(function(op) {
-      assignments[op + '='] = function(dst, src) {
-        if (dst.t != 'sym') {
-          throw 'left object is bad type:' + dst.t;
-        }
-        var a = accessor(this, dst);
-        a.set(fn[op](a.get(), evalObject(this, src) ) );
-        return dst;
-      };
-    });
+      forEach(function(op) {
+        assignments[op + '='] = function(dst, src) {
+          if (dst.t != 'sym') {
+            throw 'left object is bad type:' + dst.t;
+          }
+          var a = accessor(this, dst);
+          a.set(fn[op](a.get(), evalObject(this, src) ) );
+          return dst;
+        };
+      });
 
-    each(assignments, function(k, v) {
-      rtol[k] = true;
-    });
+    each(assignments, function(k, v) { rtol[k] = true; });
 
     var prop = function(ctx, l, r) {
       if (l.t != 'sym') {
@@ -150,7 +148,6 @@ var evaluator = function() {
           return prop(ctx, args[0], args[1]);
         }
       }
-      //console.log(name, _args);
       return obj('obj', (typeof f == 'string'? fn[f] : f).
           apply(ctx, args.map(function(arg) {
             return evalObject(ctx, arg);
@@ -320,19 +317,21 @@ var evaluator = function() {
   var getOperatorIndex = function(list) {
     var maxPrec = 0;
     var index = -1;
-    var found = function(i, op) {
-      var prec = operators[op];
-      if (index == -1 || (rtol[op]? maxPrec <= prec : maxPrec < prec) ) {
-        maxPrec = prec;
-        index = i;
-      }
-    };
     for (var i = 0; i < list.length; i += 1) {
+      var op = null;
       if (list[i].t == 'ope') {
-        found(i, list[i].v);
+        op = list[i].v;
       } else if (list[i].t == 'sym' &&
           i + 1 < list.length && list[i + 1].t == 'lis') {
-        found(i, '.');
+        op = '.';
+      }
+      if (op != null) {
+        // found
+        var prec = operators[op];
+        if (index == -1 || (rtol[op]? maxPrec <= prec : maxPrec < prec) ) {
+          maxPrec = prec;
+          index = i;
+        }
       }
     }
     return index;
